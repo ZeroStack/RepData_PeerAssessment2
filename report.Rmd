@@ -1,0 +1,81 @@
+Reproducible Research: Peer Assesment 2
+=========================================
+Created by ZeroStack
+
+## The Impact of Severe Weather on Public Health and Economic Prosperity in the United States
+
+### Synopsis
+Severe weather events can impact both public health and economic prosperity. This includes the likes of fatalaties, injuries, and property damage. In this report, we will explore data collected from the U.S. National Oceanic and Atmospheric Administration storm database to determine which types of events have the most significant impact on population health and which have the greatest economic consequences.  
+
+### Data
+The data can be obtained [https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+
+# Settings
+```{r}
+echo=TRUE
+setwd("/Users/Sahil/Courses/Coursera/Reproducible Research/Peer Assesment 2")
+library(knitr)
+```
+
+```{r}
+data <- read.csv("repdata-data-StormData.csv")
+```
+Data Dimensions General Info
+```{r}
+dim(data)
+head(data)
+```
+
+### Data Processing
+Since we are only interested in event types with respect to health and economic implications; we can filter and select only relevant variables in line with our objective. And then summarise the data by event type.
+
+```{r}
+library(dplyr, quietly = TRUE)
+data <- select(data, EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP, CROPDMG) %>% group_by(EVTYPE) %>% summarise_each(funs(sum)) %>%ungroup() %>% arrange(desc(FATALITIES, desc(INJURIES), desc(PROPDMG), desc(PROPDMGEXP), desc(CROPDMG)))
+```
+
+Our data is now as so:
+```{r}
+dim(data)
+head(data)
+```
+
+### Results
+Load plotting libraries
+```{r}
+library(ggplot2)
+```
+
+Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+```{r}
+# Select and Arrange by Fatalities and Injuries
+data.fat <- select(data, EVTYPE, FATALITIES, INJURIES) %>% arrange(desc(FATALITIES))
+data.fat <- dat.fat[1:5,]
+data.inj <- select(data, EVTYPE, FATALITIES, INJURIES) %>% arrange(desc(INJURIES))
+data.inj <- data.inj[1:5,]
+# Plot Fatalities
+ggplot(data.fat[1:5,], aes(x = EVTYPE, y = FATALITIES)) + geom_bar(fill = "steelblue", stat = "identity") + xlab("Event Type") + 
+    ylab("Number of Fatalities") + ggtitle("Total number of Fatalities")
+# Plot Injuries
+ggplot(data.inj[1:5,], aes(x = EVTYPE, y = INJURIES)) + geom_bar(fill = "steelblue", stat = "identity") + xlab("Event Type") + 
+    ylab("Number of injuries") + ggtitle("Total number of Injuries")
+```
+
+
+Across the United States, which types of events have the greatest economic consequences?
+```{r}
+# Select and Arrange by PROPDMG and CROPDMG
+data.two <- select(data, EVTYPE, PROPDMG, CROPDMG) %>% arrange(desc(PROPDMG), desc(CROPDMG))
+data.pro <- select(data.two, EVTYPE, PROPDMG, CROPDMG) %>% arrange(desc(PROPDMG))
+data.pro <- data.pro[1:5,]
+data.cro <- select(data.two, EVTYPE, PROPDMG, CROPDMG) %>% arrange(desc(CROPDMG))
+data.cro <- data.cro[1:5,]
+ggplot(data.pro, aes(x = EVTYPE, y = PROPDMG)) + geom_bar(fill = "steelblue", stat = "identity") + ggtitle("Total Value of Property Damange") + xlab("Event Type") + ylab("Value of Property Damange (US$)")
+```
+
+### Conclusion
+From the data and visualisations it is clear that Tornados and Excessive Heat cause the most damage to public health.
+
+Tornados and Flash Floods cause the most damange to property damange which is a gauge of economic impact.
+
+
